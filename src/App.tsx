@@ -1,12 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import {
-  ThemeProvider, createTheme, CssBaseline, Box, Drawer, AppBar, Toolbar,
+  ThemeProvider, CssBaseline, Box, Drawer, AppBar, Toolbar,
   Typography, IconButton, List, ListItem, ListItemButton, ListItemIcon,
   ListItemText, Avatar, Menu, MenuItem, Badge, ButtonBase,
   Snackbar, Alert, CircularProgress, Chip, Divider, Card, CardContent,
   Grid, TextField, Button, LinearProgress, Paper, Checkbox
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
+import { buildTheme } from './theme';
 
 import {
   Home, BarChart3, BookOpen, ClipboardCheck, UserRound, Menu as MenuIcon,
@@ -56,7 +57,7 @@ const availableSubjects = [
 ];
 
 const drawerWidth = 280;
-const headerHeight = 80;
+const headerHeight = 72;
 
 export default function App() {
   const [page, setPage] = useState<Page>('dashboard');
@@ -73,40 +74,7 @@ export default function App() {
 
   const handleCloseToast = () => setToast({ ...toast, open: false });
 
-  const theme = useMemo(() => createTheme({
-    palette: {
-      mode: darkMode ? 'dark' : 'light',
-      primary: { main: '#4f46e5' },
-      secondary: { main: '#8b5cf6' },
-      background: {
-        default: darkMode ? '#0f172a' : '#f8fafc',
-        paper: darkMode ? '#1e293b' : '#ffffff',
-      },
-    },
-    typography: {
-      fontFamily: '"Inter", "system-ui", sans-serif',
-      h4: { fontWeight: 800 },
-      h6: { fontWeight: 700 },
-    },
-    shape: { borderRadius: 16 },
-    components: {
-      MuiButton: {
-        styleOverrides: {
-          root: { textTransform: 'none', fontWeight: 600 },
-        },
-      },
-      MuiCard: {
-        styleOverrides: {
-          root: {
-            borderRadius: 20,
-            boxShadow: darkMode
-              ? '0 8px 30px rgba(0, 0, 0, 0.35)'
-              : '0 8px 30px rgba(15, 23, 42, 0.06)',
-          },
-        },
-      },
-    },
-  }), [darkMode]);
+  const theme = useMemo(() => buildTheme(darkMode), [darkMode]);
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
@@ -146,7 +114,7 @@ export default function App() {
             ModalProps={{ keepMounted: true }}
             sx={{
               display: { xs: 'block', lg: 'none' },
-              '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, backgroundColor: 'background.paper' },
+              '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, backgroundColor: 'surfaceAlt' },
             }}
           >
             <SidebarContent page={page} onNavigate={navigate} onLogout={() => showToast('Sessão encerrada com sucesso.', 'info')} />
@@ -155,7 +123,7 @@ export default function App() {
             variant="permanent"
             sx={{
               display: { xs: 'none', lg: 'block' },
-              '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, backgroundColor: 'background.paper', borderRight: '1px solid', borderColor: 'divider' },
+              '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, backgroundColor: 'surfaceAlt', borderRight: '1px solid', borderColor: 'divider' },
             }}
             open
           >
@@ -177,7 +145,7 @@ export default function App() {
           onClose={handleCloseToast}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         >
-          <Alert onClose={handleCloseToast} severity={toast.severity} variant="filled" sx={{ width: '100%', borderRadius: 2 }}>
+          <Alert onClose={handleCloseToast} severity={toast.severity} variant="filled" sx={{ width: '100%' }}>
             {toast.message}
           </Alert>
         </Snackbar>
@@ -196,7 +164,7 @@ function SidebarContent({ page, onNavigate, onLogout }: { page: Page; onNavigate
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4, px: 1, mt: 1 }}>
-        <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }} variant="rounded">
+        <Avatar sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', width: 40, height: 40, borderRadius: '10px' }} variant="rounded">
           <GraduationCap size={24} />
         </Avatar>
         <Box>
@@ -205,7 +173,7 @@ function SidebarContent({ page, onNavigate, onLogout }: { page: Page; onNavigate
         </Box>
       </Box>
 
-      <Typography variant="overline" color="text.secondary" sx={{ px: 2, fontWeight: 'bold' }}>Menu Principal</Typography>
+      <Typography variant="overline" color="text.secondary" sx={{ px: 2 }}>Menu Principal</Typography>
       <List sx={{ px: 0 }}>
         {navItems.map(({ id, label, icon: Icon }) => (
           <ListItem key={id} disablePadding sx={{ mb: 0.5 }}>
@@ -213,7 +181,6 @@ function SidebarContent({ page, onNavigate, onLogout }: { page: Page; onNavigate
               selected={page === id}
               onClick={() => onNavigate(id)}
               sx={{
-                borderRadius: 2,
                 '&.Mui-selected': {
                   bgcolor: 'primary.main',
                   color: 'primary.contrastText',
@@ -227,7 +194,7 @@ function SidebarContent({ page, onNavigate, onLogout }: { page: Page; onNavigate
               </ListItemIcon>
               <ListItemText primary={label} slotProps={{ primary: { sx: { fontWeight: page === id ? 700 : 500, fontSize: '0.875rem' } } }} />
               {id === 'matricula' && (
-                <Chip label="ABERTA" size="small" color="warning" sx={{ height: 20, fontSize: '0.65rem', fontWeight: 'bold' }} />
+                <Chip label="Aberta" size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
               )}
             </ListItemButton>
           </ListItem>
@@ -235,22 +202,22 @@ function SidebarContent({ page, onNavigate, onLogout }: { page: Page; onNavigate
       </List>
 
       <Box sx={{ mt: 'auto' }}>
-        <Card variant="outlined" sx={{ mb: 2, bgcolor: 'background.default', border: 'none' }}>
+        <Card variant="outlined" sx={{ mb: 2, bgcolor: 'background.default', boxShadow: 'none' }}>
           <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Avatar sx={{ bgcolor: 'secondary.main', width: 36, height: 36, fontSize: '0.875rem', fontWeight: 'bold' }}>JS</Avatar>
+              <Avatar sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', width: 36, height: 36, fontSize: '0.875rem' }}>JS</Avatar>
               <Box>
-                <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>João Silva</Typography>
+                <Typography variant="subtitle2" sx={{ fontWeight: 500 }}>João Silva</Typography>
                 <Typography variant="caption" color="text.secondary">RA 20261234</Typography>
               </Box>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1.5 }}>
-              <ShieldCheck size={16} color={theme.palette.success.main} />
+              <ShieldCheck size={16} color={theme.palette.text.secondary} />
               <Typography variant="caption" color="text.secondary">Conta protegida</Typography>
             </Box>
           </CardContent>
         </Card>
-        <ListItemButton onClick={onLogout} sx={{ borderRadius: 2, color: 'error.main' }}>
+        <ListItemButton onClick={onLogout} sx={{ color: 'error.main' }}>
           <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}><LogOut size={20} /></ListItemIcon>
           <ListItemText primary="Sair do sistema" slotProps={{ primary: { sx: { fontWeight: 600, fontSize: '0.875rem' } } }} />
         </ListItemButton>
@@ -277,8 +244,8 @@ function Header({ title, handleDrawerToggle, darkMode, setDarkMode, onProfile, o
       width: { lg: `calc(100% - ${drawerWidth}px)` },
       ml: { lg: `${drawerWidth}px` },
       bgcolor: alpha(theme.palette.background.paper, 0.72),
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
       borderBottom: '1px solid',
       borderColor: 'divider',
       color: 'text.primary',
@@ -290,8 +257,8 @@ function Header({ title, handleDrawerToggle, darkMode, setDarkMode, onProfile, o
             <MenuIcon />
           </IconButton>
           <Box>
-            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' }, textTransform: 'uppercase', letterSpacing: 1, fontWeight: 'bold' }}>Área do Aluno</Typography>
-            <Typography variant="h6" component="h1" sx={{ fontWeight: 800 }}>{title}</Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' }, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 500 }}>Área do Aluno</Typography>
+            <Typography variant="h6" component="h1" sx={{ fontWeight: 600 }}>{title}</Typography>
           </Box>
         </Box>
 
@@ -301,7 +268,7 @@ function Header({ title, handleDrawerToggle, darkMode, setDarkMode, onProfile, o
           </IconButton>
 
           <IconButton color="inherit" aria-label="Ver notificações">
-            <Badge badgeContent={2} color="error">
+            <Badge badgeContent={2} color="primary">
               <Bell size={20} />
             </Badge>
           </IconButton>
@@ -311,16 +278,16 @@ function Header({ title, handleDrawerToggle, darkMode, setDarkMode, onProfile, o
             aria-haspopup="menu"
             aria-expanded={Boolean(anchorEl)}
             aria-label="Abrir menu do perfil"
-            sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 0.5, borderRadius: 2, '&:hover': { bgcolor: 'action.hover' } }}
+            sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 0.5, borderRadius: '18px', '&:hover': { bgcolor: 'action.hover' } }}
           >
-            <Avatar sx={{ bgcolor: 'secondary.main', width: 36, height: 36, fontWeight: 'bold', fontSize: '0.875rem' }}>JS</Avatar>
+            <Avatar sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', width: 36, height: 36, fontSize: '0.875rem' }}>JS</Avatar>
             <Box sx={{ display: { xs: 'none', sm: 'block' }, textAlign: 'left' }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 'bold', lineHeight: 1.2 }}>João Silva</Typography>
+              <Typography variant="subtitle2" sx={{ lineHeight: 1.2 }}>João Silva</Typography>
               <Typography variant="caption" color="text.secondary">Aluno</Typography>
             </Box>
             <ChevronDown size={16} color={theme.palette.text.secondary} />
           </ButtonBase>
-          <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)} slotProps={{ paper: { elevation: 3, sx: { mt: 1, borderRadius: 2, minWidth: 150 } } }}>
+          <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)} slotProps={{ paper: { elevation: 0, sx: { mt: 1, minWidth: 160 } } }}>
             <MenuItem onClick={() => { setAnchorEl(null); onProfile(); }}><User size={16} style={{ marginRight: 8 }} /> Meu perfil</MenuItem>
             <Divider />
             <MenuItem onClick={() => { setAnchorEl(null); onLogout(); }} sx={{ color: 'error.main' }}><LogOut size={16} style={{ marginRight: 8 }} /> Sair</MenuItem>
@@ -337,9 +304,9 @@ function Header({ title, handleDrawerToggle, darkMode, setDarkMode, onProfile, o
 
 const metrics = [
   { label: 'Média geral', value: '8,7', hint: '+0,4 vs. semestre anterior', icon: TrendingUp, color: 'primary' as const },
-  { label: 'Disciplinas', value: '6', hint: '24 créditos matriculados', icon: BookOpen, color: 'success' as const },
-  { label: 'Frequência', value: '94%', hint: 'Excelente aproveitamento', icon: Clock3, color: 'secondary' as const },
-  { label: 'Pendências', value: '2', hint: '1 atividade • 1 matrícula', icon: AlertCircle, color: 'warning' as const },
+  { label: 'Disciplinas', value: '6', hint: '24 créditos matriculados', icon: BookOpen, color: 'primary' as const },
+  { label: 'Frequência', value: '94%', hint: 'Excelente aproveitamento', icon: Clock3, color: 'primary' as const },
+  { label: 'Pendências', value: '2', hint: '1 atividade • 1 matrícula', icon: AlertCircle, color: 'primary' as const },
 ];
 
 function MetricCard({ label, value, hint, icon: Icon, color }: {
@@ -349,11 +316,11 @@ function MetricCard({ label, value, hint, icon: Icon, color }: {
     <Card variant="outlined">
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Avatar sx={(theme) => ({ bgcolor: alpha(theme.palette[color].main, 0.15), color: `${color}.main` })}><Icon size={20} /></Avatar>
-          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>2026.2</Typography>
+          <Avatar sx={(theme) => ({ bgcolor: 'background.default', color: `${color}.main`, border: `1px solid ${theme.palette.divider}` })}><Icon size={20} /></Avatar>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>2026.2</Typography>
         </Box>
         <Typography variant="body2" color="text.secondary">{label}</Typography>
-        <Typography variant="h4" sx={{ fontWeight: 800 }}>{value}</Typography>
+        <Typography variant="h4">{value}</Typography>
         <Typography variant="caption" color="text.secondary">{hint}</Typography>
       </CardContent>
     </Card>
@@ -362,9 +329,9 @@ function MetricCard({ label, value, hint, icon: Icon, color }: {
 
 const quickActions = [
   { title: 'Consultar notas', desc: 'Veja seu desempenho', page: 'notas' as Page, icon: BarChart3, color: 'primary' as const },
-  { title: 'Ver disciplinas', desc: 'Horários e professores', page: 'disciplinas' as Page, icon: BookOpen, color: 'success' as const },
-  { title: 'Fazer matrícula', desc: 'Escolha suas disciplinas', page: 'matricula' as Page, icon: ClipboardCheck, badge: 'Aberta', color: 'warning' as const },
-  { title: 'Atualizar perfil', desc: 'Mantenha seus dados em dia', page: 'perfil' as Page, icon: UserRound, color: 'secondary' as const },
+  { title: 'Ver disciplinas', desc: 'Horários e professores', page: 'disciplinas' as Page, icon: BookOpen, color: 'primary' as const },
+  { title: 'Fazer matrícula', desc: 'Escolha suas disciplinas', page: 'matricula' as Page, icon: ClipboardCheck, badge: 'Aberta', color: 'primary' as const },
+  { title: 'Atualizar perfil', desc: 'Mantenha seus dados em dia', page: 'perfil' as Page, icon: UserRound, color: 'primary' as const },
 ];
 
 const upcomingEvents = [
@@ -378,9 +345,9 @@ function Dashboard({ onNavigate, onToast }: { onNavigate: (p: Page) => void; onT
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       {/* Banner Principal */}
-      <Paper elevation={0} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 4, bgcolor: 'primary.main', color: 'primary.contrastText', position: 'relative', overflow: 'hidden' }}>
-        <Chip icon={<Sparkles size={14} color={theme.palette.primary.contrastText} />} label="Semestre 2026.2" sx={{ bgcolor: alpha(theme.palette.common.white, 0.15), color: 'primary.contrastText', mb: 2, fontWeight: 'bold' }} />
-        <Typography variant="h4" component="h2" gutterBottom>Olá, João! 👋</Typography>
+      <Paper elevation={0} sx={{ p: { xs: 3, sm: 4 }, borderRadius: '24px', bgcolor: 'primary.main', color: 'primary.contrastText', position: 'relative', overflow: 'hidden' }}>
+        <Chip icon={<Sparkles size={14} color={theme.palette.primary.contrastText} />} label="Semestre 2026.2" sx={{ bgcolor: alpha(theme.palette.common.white, 0.15), color: 'primary.contrastText', mb: 2 }} />
+        <Typography variant="h4" component="h2" gutterBottom>Olá, João!</Typography>
         <Typography variant="body1" sx={{ opacity: 0.9, maxWidth: 600, mb: 3 }}>
           Acompanhe sua jornada acadêmica em um só lugar. Você está indo muito bem neste semestre.
         </Typography>
@@ -388,7 +355,7 @@ function Dashboard({ onNavigate, onToast }: { onNavigate: (p: Page) => void; onT
           variant="contained"
           onClick={() => onNavigate('notas')}
           endIcon={<ArrowRight size={16} />}
-          sx={{ bgcolor: 'common.white', color: 'primary.dark', fontWeight: 'bold', borderRadius: 3, '&:hover': { bgcolor: 'grey.100' } }}
+          sx={{ bgcolor: 'primary.contrastText', color: 'primary.main', '&:hover': { bgcolor: 'primary.contrastText', opacity: 0.9 } }}
         >
           Ver meu desempenho
         </Button>
@@ -419,19 +386,19 @@ function Dashboard({ onNavigate, onToast }: { onNavigate: (p: Page) => void; onT
                       onClick={() => onNavigate(action.page)}
                       aria-label={`${action.title}: ${action.desc}`}
                       sx={{
-                        width: '100%', p: 2, display: 'flex', alignItems: 'center', gap: 2,
+                        width: '100%', p: 2, borderRadius: '18px', display: 'flex', alignItems: 'center', gap: 2,
                         justifyContent: 'flex-start', textAlign: 'left', transition: 'transform 0.2s, box-shadow 0.2s, border-color 0.2s',
-                        '&:hover': { borderColor: `${action.color}.main`, boxShadow: 3, transform: 'translateY(-2px)' },
-                        '&:hover .quick-action-arrow': { transform: 'translateX(4px)', color: `${action.color}.main` },
+                        '&:hover': { borderColor: 'text.primary', transform: 'translateY(-2px)' },
+                        '&:hover .quick-action-arrow': { transform: 'translateX(4px)', color: 'text.primary' },
                       }}
                     >
-                      <Avatar sx={{ bgcolor: alpha(theme.palette[action.color].main, 0.12), color: `${action.color}.main` }}>
+                      <Avatar sx={{ bgcolor: 'background.default', color: 'text.primary' }}>
                         <action.icon size={20} />
                       </Avatar>
-                      <Box sx={{ flexGrow: 1 }}>
+                      <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>{action.title}</Typography>
-                          {action.badge && <Chip label={action.badge} size="small" color="success" sx={{ height: 18, fontSize: '0.65rem' }} />}
+                          <Typography variant="subtitle2">{action.title}</Typography>
+                          {action.badge && <Chip label={action.badge} size="small" color="primary" sx={{ height: 18, fontSize: '0.7rem' }} />}
                         </Box>
                         <Typography variant="caption" color="text.secondary">{action.desc}</Typography>
                       </Box>
@@ -457,17 +424,17 @@ function Dashboard({ onNavigate, onToast }: { onNavigate: (p: Page) => void; onT
               </Box>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                 {upcomingEvents.map((event) => (
-                  <Box key={event.title} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1, borderRadius: 2, '&:hover': { bgcolor: 'action.hover' } }}>
+                  <Box key={event.title} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, p: 1, borderRadius: '18px', '&:hover': { bgcolor: 'action.hover' } }}>
                     <Box sx={{
-                      width: 56, flexShrink: 0, textAlign: 'center', borderRadius: 2, py: 0.75, px: 0.5,
-                      fontSize: '0.65rem', fontWeight: 800,
-                      bgcolor: alpha(theme.palette[event.urgent ? 'error' : 'primary'].main, 0.12),
-                      color: `${event.urgent ? 'error' : 'primary'}.main`,
+                      width: 56, flexShrink: 0, textAlign: 'center', borderRadius: '10px', py: 0.75, px: 0.5,
+                      fontSize: '0.75rem', fontWeight: 600,
+                      bgcolor: event.urgent ? 'primary.main' : 'background.default',
+                      color: event.urgent ? 'primary.contrastText' : 'text.primary',
                     }}>
                       {event.date}
                     </Box>
                     <Box sx={{ minWidth: 0 }}>
-                      <Typography variant="body2" noWrap sx={{ fontWeight: 'bold' }}>{event.title}</Typography>
+                      <Typography variant="body2" noWrap sx={{ fontWeight: 500 }}>{event.title}</Typography>
                       <Typography variant="caption" color="text.secondary" noWrap>{event.meta}</Typography>
                     </Box>
                   </Box>
@@ -508,7 +475,7 @@ function Matricula({ onToast }: { onToast: (m: string, severity?: 'success' | 'e
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Box>
-        <Typography variant="h5" sx={{ fontWeight: 800 }}>Monte sua grade</Typography>
+        <Typography variant="h5" sx={{ fontWeight: 600 }}>Monte sua grade</Typography>
         <Typography variant="body2" color="text.secondary">Selecione as disciplinas desejadas para o período 2026.2.</Typography>
       </Box>
 
@@ -524,13 +491,13 @@ function Matricula({ onToast }: { onToast: (m: string, severity?: 'success' | 'e
                   onClick={() => toggle(s.code)}
                   sx={{ cursor: 'pointer', borderColor: isSelected ? 'primary.main' : 'divider', bgcolor: isSelected ? 'action.selected' : 'background.paper' }}
                 >
-                  <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                     <Checkbox checked={isSelected} slotProps={{ input: { 'aria-label': `Selecionar ${s.name}` } }} />
-                    <Box sx={{ flexGrow: 1 }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{s.name}</Typography>
+                    <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                      <Typography variant="subtitle1">{s.name}</Typography>
                       <Typography variant="caption" color="text.secondary">{s.code} • {s.professor} • {s.schedule}</Typography>
                     </Box>
-                    <Chip label={`${s.vacancies} vagas`} size="small" variant="outlined" />
+                    <Chip label={`${s.vacancies} vagas`} size="small" variant="outlined" sx={{ flexShrink: 0 }} />
                   </CardContent>
                 </Card>
               );
@@ -545,11 +512,11 @@ function Matricula({ onToast }: { onToast: (m: string, severity?: 'success' | 'e
               <Divider sx={{ my: 1.5 }} />
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography color="text.secondary">Disciplinas selecionadas:</Typography>
-                <Typography sx={{ fontWeight: 'bold' }}>{selected.length}</Typography>
+                <Typography sx={{ fontWeight: 500 }}>{selected.length}</Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
                 <Typography color="text.secondary">Total de créditos:</Typography>
-                <Typography sx={{ fontWeight: 'bold' }}>{credits}</Typography>
+                <Typography sx={{ fontWeight: 500 }}>{credits}</Typography>
               </Box>
 
               <Button 
@@ -558,7 +525,7 @@ function Matricula({ onToast }: { onToast: (m: string, severity?: 'success' | 'e
                 size="large"
                 onClick={handleSubmit} 
                 disabled={loading}
-                sx={{ borderRadius: 3, height: 48 }}
+                sx={{ height: 48 }}
               >
                 {loading ? <CircularProgress size={24} color="inherit" /> : 'Continuar matrícula'}
               </Button>
@@ -578,7 +545,7 @@ function Notas() {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Box>
-        <Typography variant="h5" sx={{ fontWeight: 800 }}>Boletim Acadêmico</Typography>
+        <Typography variant="h5" sx={{ fontWeight: 600 }}>Boletim Acadêmico</Typography>
         <Typography variant="body2" color="text.secondary">Acompanhe suas notas e o andamento de cada disciplina no período 2026.2.</Typography>
       </Box>
 
@@ -587,13 +554,13 @@ function Notas() {
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {grades.map(g => (
               <Card key={g.code} variant="outlined">
-                <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>{g.name}</Typography>
+                <CardContent sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1.5 }}>
+                  <Box sx={{ flexGrow: 1, minWidth: 180 }}>
+                    <Typography variant="subtitle1">{g.name}</Typography>
                     <Typography variant="caption" color="text.secondary">{g.code} • {g.professor}</Typography>
                   </Box>
-                  <Chip label={g.status} color={g.status === 'Aprovado' ? 'success' : 'warning'} size="small" />
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', minWidth: 44, textAlign: 'right' }}>{g.grade.toFixed(1)}</Typography>
+                  <Chip label={g.status} color="primary" variant={g.status === 'Aprovado' ? 'filled' : 'outlined'} size="small" />
+                  <Typography variant="h6" sx={{ minWidth: 44, textAlign: 'right' }}>{g.grade.toFixed(1)}</Typography>
                 </CardContent>
               </Card>
             ))}
@@ -607,15 +574,15 @@ function Notas() {
               <Divider sx={{ my: 1.5 }} />
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography color="text.secondary">Média geral:</Typography>
-                <Typography sx={{ fontWeight: 'bold' }}>{media.toFixed(1)}</Typography>
+                <Typography sx={{ fontWeight: 500 }}>{media.toFixed(1)}</Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography color="text.secondary">Disciplinas aprovadas:</Typography>
-                <Typography sx={{ fontWeight: 'bold' }}>{aprovadas}</Typography>
+                <Typography sx={{ fontWeight: 500 }}>{aprovadas}</Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography color="text.secondary">Em andamento:</Typography>
-                <Typography sx={{ fontWeight: 'bold' }}>{emAndamento}</Typography>
+                <Typography sx={{ fontWeight: 500 }}>{emAndamento}</Typography>
               </Box>
             </CardContent>
           </Card>
@@ -632,11 +599,11 @@ function Disciplinas() {
         <Grid size={{ xs: 12, sm: 6 }} key={s.code}>
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{s.name}</Typography>
+              <Typography variant="h6">{s.name}</Typography>
               <Typography variant="caption" color="text.secondary">{s.code} • {s.professor}</Typography>
               <Box sx={{ mt: 2 }}>
                 <Typography variant="caption" color="text.secondary">Progresso: {s.progress}%</Typography>
-                <LinearProgress variant="determinate" value={s.progress} sx={{ height: 8, borderRadius: 2, mt: 0.5 }} />
+                <LinearProgress variant="determinate" value={s.progress} aria-label={`Progresso em ${s.name}`} sx={{ height: 8, mt: 0.5 }} />
               </Box>
             </CardContent>
           </Card>

@@ -5,7 +5,7 @@ Frontend demonstrativo de um portal acadêmico responsivo.
 ## Stack
 - React + TypeScript
 - Vite
-- Tailwind CSS
+- Material-UI (MUI) + Emotion
 - Lucide React
 
 ## Rodar localmente
