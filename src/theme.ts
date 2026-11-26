@@ -22,7 +22,7 @@ const tokens = {
     ink: '#0a0a0a',
     inkSoft: '#171717',
     inkContrast: '#fafafa',
-    muted: '#737373',
+    muted: '#666666',
     hairline: '#e5e5e5',
     cardShadow:
       '0 0 0 1px rgba(23,23,23,0.05), 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)',
@@ -54,7 +54,8 @@ export function buildTheme(darkMode: boolean) {
       success: { main: t.inkSoft, contrastText: t.inkContrast },
       info: { main: t.inkSoft, contrastText: t.inkContrast },
       warning: { main: t.muted, contrastText: t.inkContrast },
-      error: { main: ember, contrastText: '#ffffff' },
+      // No modo escuro o vermelho é clareado para manter contraste mínimo de 4,5:1.
+      error: darkMode ? { main: '#ff6369', contrastText: '#0a0a0a' } : { main: ember, contrastText: '#ffffff' },
       background: { default: t.canvas, paper: t.paper },
       surfaceAlt: t.surfaceAlt,
       text: { primary: t.ink, secondary: t.muted },
@@ -119,6 +120,8 @@ export function buildTheme(darkMode: boolean) {
           outlined: { borderColor: t.hairline },
         },
       },
+      // Rótulo flutuante dos campos: 16 px × 0,75 = 12 px (mínimo do design system).
+      MuiInputLabel: { styleOverrides: { root: { fontSize: '1rem' } } },
       MuiTab: { styleOverrides: { root: { textTransform: 'none', fontWeight: 500, minHeight: 44 } } },
       MuiAlert: { styleOverrides: { root: { borderRadius: radius.interactive } } },
       MuiListItemButton: { styleOverrides: { root: { borderRadius: radius.interactive } } },

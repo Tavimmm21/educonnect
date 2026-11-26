@@ -180,7 +180,7 @@ function SidebarContent({ page, onNavigate, onLogout }: { page: Page; onNavigate
               </ListItemIcon>
               <ListItemText primary={label} slotProps={{ primary: { sx: { fontWeight: page === id ? 700 : 500, fontSize: '0.875rem' } } }} />
               {id === 'matricula' && (
-                <Chip label="Aberta" size="small" color="primary" sx={{ height: 20, fontSize: '0.7rem' }} />
+                <Chip label="Aberta" size="small" color="primary" sx={{ height: 20, fontSize: '0.75rem' }} />
               )}
             </ListItemButton>
           </ListItem>
@@ -397,7 +397,7 @@ function Dashboard({ onNavigate, onToast }: { onNavigate: (p: Page) => void; onT
                       <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Typography variant="subtitle2">{action.title}</Typography>
-                          {action.badge && <Chip label={action.badge} size="small" color="primary" sx={{ height: 18, fontSize: '0.7rem' }} />}
+                          {action.badge && <Chip label={action.badge} size="small" color="primary" sx={{ height: 18, fontSize: '0.75rem' }} />}
                         </Box>
                         <Typography variant="caption" color="text.secondary">{action.desc}</Typography>
                       </Box>

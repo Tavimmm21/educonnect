@@ -35,3 +35,17 @@ Depois abra a URL exibida pelo Vite.
 - Microinterações e animações
 
 Os dados são mockados e o frontend está pronto para ser conectado a uma API/backend.
+
+## Testes
+Suíte de regressão ponta a ponta (18 casos) e auditoria de acessibilidade (tamanho de texto e contraste), com Playwright.
+Com o app rodando (`npm run dev`), em outro terminal:
+
+```bash
+npm i -D playwright
+npx playwright install chromium
+node tests/regress.cjs
+node tests/a11y-audit.cjs
+```
+
+## Documentação
+A documentação de especificação e a apresentação estão na pasta `entrega/` (arquivos editáveis e PDFs).
