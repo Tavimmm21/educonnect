@@ -10,6 +10,7 @@ import { alpha, useTheme } from '@mui/material/styles';
 import { buildTheme } from './theme';
 import { grades, subjects, availableSubjects, ENROLLED_CREDITS, MAX_CREDITS, PASSING_GRADE } from './data';
 import { findConflicts } from './schedule';
+import PlannerDialog from './PlannerDialog';
 
 import {
   Home, BarChart3, BookOpen, ClipboardCheck, UserRound, Menu as MenuIcon,
@@ -446,6 +447,7 @@ function Dashboard({ onNavigate, onToast }: { onNavigate: (p: Page) => void; onT
 function Matricula({ onToast }: { onToast: (m: string, severity?: 'success' | 'error' | 'info') => void }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [plannerOpen, setPlannerOpen] = useState(false);
 
   const toggle = (code: string) => setSelected(s => s.includes(code) ? s.filter(x => x !== code) : [...s, code]);
   const selectedSubjects = availableSubjects.filter(s => selected.includes(s.code));
@@ -474,10 +476,24 @@ function Matricula({ onToast }: { onToast: (m: string, severity?: 'success' | 'e
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      <Box>
-        <Typography variant="h5">Monte sua grade</Typography>
-        <Typography variant="body2" color="text.secondary">Selecione as disciplinas desejadas para o período 2026.2.</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+        <Box>
+          <Typography variant="h5">Monte sua grade</Typography>
+          <Typography variant="body2" color="text.secondary">Selecione as disciplinas desejadas para o período 2026.2.</Typography>
+        </Box>
+        <Button variant="outlined" startIcon={<Sparkles size={16} />} onClick={() => setPlannerOpen(true)}>
+          Montar grade para mim
+        </Button>
       </Box>
+      <PlannerDialog
+        open={plannerOpen}
+        onClose={() => setPlannerOpen(false)}
+        onApply={(codes) => {
+          setSelected(codes);
+          setPlannerOpen(false);
+          onToast(`Grade aplicada com ${codes.length} disciplina(s). Revise e continue a matrícula.`, 'success');
+        }}
+      />
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 8 }}>

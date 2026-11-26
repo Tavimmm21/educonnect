@@ -24,6 +24,10 @@ export const availableSubjects = [
   { name: 'Segurança da Informação', code: 'SEC320', professor: 'Bruno Dias', schedule: 'Ter • 21:00 – 23:00', credits: 4, vacancies: 7 },
   { name: 'Mobile Development', code: 'MOB305', professor: 'Diego Ramos', schedule: 'Qua • 21:00 – 23:00', credits: 4, vacancies: 15 },
   { name: 'Redes de Computadores', code: 'RED330', professor: 'Sérgio Pinto', schedule: 'Ter • 20:00 – 22:00', credits: 4, vacancies: 9 },
+  { name: 'Gestão de Projetos', code: 'GES340', professor: 'Helena Torres', schedule: 'Sex • 19:00 – 21:00', credits: 3, vacancies: 18 },
+  { name: 'Empreendedorismo Digital', code: 'EMP250', professor: 'Caio Barros', schedule: 'Sex • 21:00 – 23:00', credits: 3, vacancies: 20 },
+  { name: 'Ciência de Dados', code: 'CDD360', professor: 'Renata Faria', schedule: 'Qui • 19:00 – 21:00', credits: 4, vacancies: 6 },
+  { name: 'Ética e Sociedade', code: 'ETI120', professor: 'Paulo Vieira', schedule: 'Qua • 19:00 – 21:00', credits: 2, vacancies: 25 },
   { name: 'Inteligência Artificial', code: 'IA401', professor: 'Patrícia Melo', schedule: 'Qui • 21:00 – 23:00', credits: 5, vacancies: 4 },
 ];
 
