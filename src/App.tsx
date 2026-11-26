@@ -97,6 +97,8 @@ export default function App() {
       <CssBaseline />
       <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
         
+        <Box component="a" href="#conteudo" sx={{ position: 'absolute', left: 8, top: -48, zIndex: (t) => t.zIndex.tooltip, bgcolor: 'primary.main', color: 'primary.contrastText', px: 2, py: 1, borderRadius: '18px', '&:focus': { top: 8 } }}>Pular para o conteúdo</Box>
+
         <Header 
           title={title} 
           handleDrawerToggle={handleDrawerToggle} 
@@ -131,7 +133,7 @@ export default function App() {
           </Drawer>
         </Box>
 
-        <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, sm: 3, md: 4 }, width: { lg: `calc(100% - ${drawerWidth}px)` }, mt: `${headerHeight}px` }}>
+        <Box component="main" id="conteudo" tabIndex={-1} sx={{ outline: 'none',  flexGrow: 1, p: { xs: 2, sm: 3, md: 4 }, width: { lg: `calc(100% - ${drawerWidth}px)` }, mt: `${headerHeight}px` }}>
           {page === 'dashboard' && <Dashboard onNavigate={navigate} onToast={showToast} />}
           {page === 'notas' && <Notas />}
           {page === 'disciplinas' && <Disciplinas />}
@@ -237,6 +239,7 @@ type HeaderProps = {
 
 function Header({ title, handleDrawerToggle, darkMode, setDarkMode, onProfile, onLogout }: HeaderProps) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [notifEl, setNotifEl] = useState<null | HTMLElement>(null);
   const theme = useTheme();
 
   return (
@@ -267,11 +270,23 @@ function Header({ title, handleDrawerToggle, darkMode, setDarkMode, onProfile, o
             {darkMode ? <Sun size={20} /> : <Moon size={20} />}
           </IconButton>
 
-          <IconButton color="inherit" aria-label="Ver notificações">
+          <IconButton color="inherit" aria-label="Ver notificações" aria-haspopup="menu" onClick={(e) => setNotifEl(e.currentTarget)}>
             <Badge badgeContent={2} color="primary">
               <Bell size={20} />
             </Badge>
           </IconButton>
+          <Menu anchorEl={notifEl} open={Boolean(notifEl)} onClose={() => setNotifEl(null)} slotProps={{ paper: { elevation: 0, sx: { mt: 1, width: 300, maxWidth: 'calc(100vw - 32px)' } } }}>
+            <Typography variant="subtitle2" sx={{ px: 2, py: 1 }}>Notificações</Typography>
+            <Divider />
+            <MenuItem onClick={() => setNotifEl(null)} sx={{ whiteSpace: 'normal', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>Matrícula aberta até 05 SET</Typography>
+              <Typography variant="caption" color="text.secondary">Escolha suas disciplinas de 2026.2.</Typography>
+            </MenuItem>
+            <MenuItem onClick={() => setNotifEl(null)} sx={{ whiteSpace: 'normal', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>Entrega do projeto Web</Typography>
+              <Typography variant="caption" color="text.secondary">Prazo em 02 SET.</Typography>
+            </MenuItem>
+          </Menu>
 
           <ButtonBase
             onClick={(e) => setAnchorEl(e.currentTarget)}
@@ -613,14 +628,39 @@ function Disciplinas() {
   );
 }
 
-function Perfil({ onToast }: { onToast: (m: string) => void }) {
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function Perfil({ onToast }: { onToast: (m: string, severity?: 'success' | 'error' | 'info') => void }) {
   const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({ nome: 'João Silva', email: 'joao.silva@email.com', telefone: '(11) 99999-8888' });
+  const [touched, setTouched] = useState({ nome: false, email: false, telefone: false });
+
+  const errors = {
+    nome: form.nome.trim().length < 3 ? 'Informe seu nome completo.' : '',
+    email: emailRegex.test(form.email) ? '' : 'Informe um e-mail válido, como nome@email.com.',
+    telefone: form.telefone.replace(/\D/g, '').length >= 10 ? '' : 'Informe o telefone com DDD.',
+  };
+  const hasErrors = Object.values(errors).some(Boolean);
+
+  const bind = (field: keyof typeof form) => ({
+    value: form[field],
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [field]: e.target.value }),
+    onBlur: () => setTouched({ ...touched, [field]: true }),
+    error: touched[field] && Boolean(errors[field]),
+    helperText: touched[field] ? errors[field] : '',
+    fullWidth: true,
+  });
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    if (hasErrors) {
+      setTouched({ nome: true, email: true, telefone: true });
+      return onToast('Corrija os campos destacados antes de salvar.', 'error');
+    }
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
-      onToast('Dados do perfil salvos com sucesso!');
+      onToast('Alterações salvas com sucesso!');
     }, 1500);
   };
 
@@ -628,16 +668,12 @@ function Perfil({ onToast }: { onToast: (m: string) => void }) {
     <Card variant="outlined">
       <CardContent>
         <Typography variant="h6" gutterBottom>Meus Dados Pessoais</Typography>
-        <Box component="form" onSubmit={handleSave} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, mt: 2 }}>
-            <TextField label="Nome Completo" defaultValue="João Silva" fullWidth />
-            <TextField label="E-mail" defaultValue="joao.silva@email.com" fullWidth />
-            <TextField label="Telefone" defaultValue="(11) 99999-8888" fullWidth />
-          <Button 
-            type="submit" 
-            variant="contained" 
-            disabled={loading} 
-            sx={{ alignSelf: 'flex-end', height: 44, minWidth: 160 }}
-          >
+        <Typography variant="body2" color="text.secondary">Atualize seus dados de contato.</Typography>
+        <Box component="form" noValidate onSubmit={handleSave} sx={{ display: 'flex', flexDirection: 'column', gap: 2.5, mt: 3 }}>
+          <TextField label="Nome completo" required autoComplete="name" {...bind('nome')} />
+          <TextField label="E-mail" type="email" required autoComplete="email" {...bind('email')} />
+          <TextField label="Telefone" type="tel" required autoComplete="tel" {...bind('telefone')} />
+          <Button type="submit" variant="contained" disabled={loading} sx={{ alignSelf: { xs: 'stretch', sm: 'flex-end' }, height: 44, minWidth: 160 }}>
             {loading ? <CircularProgress size={24} color="inherit" /> : 'Salvar alterações'}
           </Button>
         </Box>
