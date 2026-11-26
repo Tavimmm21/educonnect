@@ -15,7 +15,7 @@ import CalendarPage from './CalendarPage';
 
 import {
   Home, BarChart3, BookOpen, ClipboardCheck, UserRound, Menu as MenuIcon,
-  Bell, ChevronDown, LogOut, GraduationCap, ShieldCheck, CalendarDays,
+  Bell, ChevronDown, LogOut, Flame, ShieldCheck, CalendarDays,
   Sparkles, TrendingUp, Clock3, AlertCircle, User,
   Moon, Sun, ArrowRight, Search, type LucideIcon
 } from 'lucide-react';
@@ -151,10 +151,10 @@ function SidebarContent({ page, onNavigate, onLogout }: { page: Page; onNavigate
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', p: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4, px: 1, mt: 1 }}>
         <Avatar sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', width: 40, height: 40, borderRadius: '10px' }} variant="rounded">
-          <GraduationCap size={24} />
+          <Flame size={24} />
         </Avatar>
         <Box>
-          <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2 }}>EduConnect</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2 }}>Lume</Typography>
           <Typography variant="caption" color="text.secondary">Portal acadêmico</Typography>
         </Box>
       </Box>

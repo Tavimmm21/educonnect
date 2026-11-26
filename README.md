@@ -1,6 +1,8 @@
-# EduConnect — Frontend
+# Lume — Portal acadêmico (EduConnect)
 
-Frontend demonstrativo de um portal acadêmico responsivo.
+> Clareza para o seu semestre.
+
+Frontend demonstrativo de um portal acadêmico responsivo, refatorado com Material-UI (MUI).
 
 ## Stack
 - React + TypeScript
@@ -19,6 +21,10 @@ Depois abra a URL exibida pelo Vite.
 
 ## Funcionalidades demonstradas
 - Dashboard acadêmico
+- Calendário inteligente do semestre 2027.1, com provas, entregas e simulação de faltas
+- Assistente de faltas (baseado em regras)
+- Assistente de grade na matrícula, com detecção de conflito de horário
+- Boletim com gráfico, busca e filtros
 - Consulta de notas
 - Disciplinas com busca e progresso
 - Matrícula com seleção e resumo
