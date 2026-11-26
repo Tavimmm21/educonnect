@@ -4,16 +4,18 @@ import {
   Typography, IconButton, List, ListItem, ListItemButton, ListItemIcon,
   ListItemText, Avatar, Menu, MenuItem, Badge, ButtonBase,
   Snackbar, Alert, CircularProgress, Chip, Divider, Card, CardContent,
-  Grid, TextField, Button, LinearProgress, Paper, Checkbox
+  Grid, TextField, Button, LinearProgress, Paper, Checkbox, InputAdornment
 } from '@mui/material';
 import { alpha, useTheme } from '@mui/material/styles';
 import { buildTheme } from './theme';
+import { grades, subjects, availableSubjects, ENROLLED_CREDITS, MAX_CREDITS, PASSING_GRADE } from './data';
+import { findConflicts } from './schedule';
 
 import {
   Home, BarChart3, BookOpen, ClipboardCheck, UserRound, Menu as MenuIcon,
   Bell, ChevronDown, LogOut, GraduationCap, ShieldCheck, CalendarDays,
   Sparkles, TrendingUp, Clock3, AlertCircle, User,
-  Moon, Sun, ArrowRight, type LucideIcon
+  Moon, Sun, ArrowRight, Search, type LucideIcon
 } from 'lucide-react';
 
 type Page = 'dashboard' | 'notas' | 'disciplinas' | 'matricula' | 'perfil';
@@ -32,29 +34,6 @@ const navItems: NavItem[] = [
   { id: 'perfil', label: 'Meu perfil', icon: UserRound },
 ];
 
-const grades = [
-  { name: 'Desenvolvimento Web', code: 'WEB301', grade: 9.4, status: 'Aprovado', professor: 'Marina Costa' },
-  { name: 'Banco de Dados', code: 'BD204', grade: 8.7, status: 'Aprovado', professor: 'Rafael Mendes' },
-  { name: 'Engenharia de Software', code: 'ENG210', grade: 8.2, status: 'Aprovado', professor: 'Carla Nunes' },
-  { name: 'UX e Design de Interfaces', code: 'UX110', grade: 9.1, status: 'Aprovado', professor: 'Lucas Alves' },
-  { name: 'Estruturas de Dados', code: 'ED202', grade: 7.6, status: 'Em andamento', professor: 'João Prado' },
-  { name: 'Arquitetura de Computadores', code: 'AC101', grade: 8.0, status: 'Em andamento', professor: 'Ana Lima' },
-];
-
-const subjects = [
-  { name: 'Desenvolvimento Web', code: 'WEB301', professor: 'Marina Costa', schedule: 'Seg • 19:00 – 21:00', room: 'Lab 03', credits: 4, progress: 82 },
-  { name: 'Banco de Dados', code: 'BD204', professor: 'Rafael Mendes', schedule: 'Ter • 19:00 – 21:00', room: 'Sala 12', credits: 4, progress: 76 },
-  { name: 'Engenharia de Software', code: 'ENG210', professor: 'Carla Nunes', schedule: 'Qua • 19:00 – 21:00', room: 'Sala 08', credits: 4, progress: 70 },
-  { name: 'UX e Design de Interfaces', code: 'UX110', professor: 'Lucas Alves', schedule: 'Qui • 19:00 – 21:00', room: 'Lab 01', credits: 3, progress: 91 },
-  { name: 'Estruturas de Dados', code: 'ED202', professor: 'João Prado', schedule: 'Sex • 19:00 – 21:00', room: 'Lab 02', credits: 4, progress: 61 },
-];
-
-const availableSubjects = [
-  { name: 'Computação em Nuvem', code: 'CLD310', professor: 'Fernanda Reis', schedule: 'Seg • 21:00 – 23:00', credits: 4, vacancies: 12 },
-  { name: 'Segurança da Informação', code: 'SEC320', professor: 'Bruno Dias', schedule: 'Ter • 21:00 – 23:00', credits: 4, vacancies: 7 },
-  { name: 'Mobile Development', code: 'MOB305', professor: 'Diego Ramos', schedule: 'Qua • 21:00 – 23:00', credits: 4, vacancies: 15 },
-  { name: 'Inteligência Artificial', code: 'IA401', professor: 'Patrícia Melo', schedule: 'Qui • 21:00 – 23:00', credits: 5, vacancies: 4 },
-];
 
 const drawerWidth = 280;
 const headerHeight = 72;
@@ -463,20 +442,26 @@ function Dashboard({ onNavigate, onToast }: { onNavigate: (p: Page) => void; onT
   );
 }
 
-// MATRÍCULA (Com Tratamento de Erro e Loading)
+// MATRÍCULA (erro, loading, conflito de horário e limite de créditos)
 function Matricula({ onToast }: { onToast: (m: string, severity?: 'success' | 'error' | 'info') => void }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const toggle = (code: string) => setSelected(s => s.includes(code) ? s.filter(x => x !== code) : [...s, code]);
   const selectedSubjects = availableSubjects.filter(s => selected.includes(s.code));
-  const credits = selectedSubjects.reduce((sum, s) => sum + s.credits, 24);
+  const credits = selectedSubjects.reduce((sum, s) => sum + s.credits, ENROLLED_CREDITS);
+
+  const conflicts = findConflicts(selectedSubjects, subjects);
+  const conflictCodes = new Set(conflicts.map(c => c.code));
+  const overLimit = credits > MAX_CREDITS;
+  const blocked = conflicts.length > 0 || overLimit;
 
   const handleSubmit = () => {
     // DESAFIO OPÇÃO B: Tratamento de erro se nada for selecionado
     if (selected.length === 0) {
       return onToast('Erro: Selecione pelo menos uma disciplina para continuar a matrícula.', 'error');
     }
+    if (blocked) return;
 
     // REQUISITO 4: Loading ao simular envio
     setLoading(true);
@@ -490,7 +475,7 @@ function Matricula({ onToast }: { onToast: (m: string, severity?: 'success' | 'e
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Box>
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>Monte sua grade</Typography>
+        <Typography variant="h5">Monte sua grade</Typography>
         <Typography variant="body2" color="text.secondary">Selecione as disciplinas desejadas para o período 2026.2.</Typography>
       </Box>
 
@@ -499,20 +484,24 @@ function Matricula({ onToast }: { onToast: (m: string, severity?: 'success' | 'e
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             {availableSubjects.map((s) => {
               const isSelected = selected.includes(s.code);
+              const hasConflict = isSelected && conflictCodes.has(s.code);
               return (
-                <Card 
-                  key={s.code} 
-                  variant="outlined" 
+                <Card
+                  key={s.code}
+                  variant="outlined"
                   onClick={() => toggle(s.code)}
-                  sx={{ cursor: 'pointer', borderColor: isSelected ? 'primary.main' : 'divider', bgcolor: isSelected ? 'action.selected' : 'background.paper' }}
+                  sx={{ cursor: 'pointer', borderColor: hasConflict ? 'error.main' : isSelected ? 'primary.main' : 'divider', bgcolor: isSelected ? 'action.selected' : 'background.paper' }}
                 >
                   <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                     <Checkbox checked={isSelected} slotProps={{ input: { 'aria-label': `Selecionar ${s.name}` } }} />
                     <Box sx={{ flexGrow: 1, minWidth: 0 }}>
                       <Typography variant="subtitle1">{s.name}</Typography>
-                      <Typography variant="caption" color="text.secondary">{s.code} • {s.professor} • {s.schedule}</Typography>
+                      <Typography variant="caption" color="text.secondary">{s.code} • {s.professor} • {s.schedule} • {s.credits} créditos</Typography>
                     </Box>
-                    <Chip label={`${s.vacancies} vagas`} size="small" variant="outlined" sx={{ flexShrink: 0 }} />
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5, flexShrink: 0 }}>
+                      <Chip label={`${s.vacancies} vagas`} size="small" variant="outlined" />
+                      {hasConflict && <Chip label="Conflito" size="small" color="error" variant="outlined" />}
+                    </Box>
                   </CardContent>
                 </Card>
               );
@@ -521,7 +510,7 @@ function Matricula({ onToast }: { onToast: (m: string, severity?: 'success' | 'e
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }}>
-          <Card variant="outlined">
+          <Card variant="outlined" sx={{ position: { md: 'sticky' }, top: { md: headerHeight + 24 } }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>Resumo</Typography>
               <Divider sx={{ my: 1.5 }} />
@@ -529,21 +518,52 @@ function Matricula({ onToast }: { onToast: (m: string, severity?: 'success' | 'e
                 <Typography color="text.secondary">Disciplinas selecionadas:</Typography>
                 <Typography sx={{ fontWeight: 500 }}>{selected.length}</Typography>
               </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography color="text.secondary">Total de créditos:</Typography>
-                <Typography sx={{ fontWeight: 500 }}>{credits}</Typography>
+                <Typography sx={{ fontWeight: 500 }} color={overLimit ? 'error' : 'text.primary'}>{credits} / {MAX_CREDITS}</Typography>
               </Box>
+              <LinearProgress
+                variant="determinate"
+                value={Math.min(100, (credits / MAX_CREDITS) * 100)}
+                color={overLimit ? 'error' : 'primary'}
+                aria-label="Créditos em relação ao limite do período"
+                sx={{ height: 8, mb: 3 }}
+              />
 
-              <Button 
-                variant="contained" 
-                fullWidth 
+              {blocked && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }} aria-live="polite">
+                  {overLimit && (
+                    <Alert severity="error" variant="outlined">
+                      Limite excedido: o máximo é de {MAX_CREDITS} créditos por período. Remova {credits - MAX_CREDITS} crédito(s).
+                    </Alert>
+                  )}
+                  {conflicts.filter(c => c.withEnrolled || c.code < c.other.code).map(c => {
+                    const mine = availableSubjects.find(s => s.code === c.code)!;
+                    return (
+                      <Alert key={`${c.code}-${c.other.code}`} severity="error" variant="outlined">
+                        Conflito de horário: {mine.name} ({mine.schedule}) coincide com {c.other.name}
+                        {c.withEnrolled ? ', que você já cursa' : ''}.
+                      </Alert>
+                    );
+                  })}
+                </Box>
+              )}
+
+              <Button
+                variant="contained"
+                fullWidth
                 size="large"
-                onClick={handleSubmit} 
-                disabled={loading}
+                onClick={handleSubmit}
+                disabled={loading || blocked}
                 sx={{ height: 48 }}
               >
                 {loading ? <CircularProgress size={24} color="inherit" /> : 'Continuar matrícula'}
               </Button>
+              {blocked && (
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                  Resolva os avisos acima para continuar.
+                </Typography>
+              )}
             </CardContent>
           </Card>
         </Grid>
@@ -552,34 +572,106 @@ function Matricula({ onToast }: { onToast: (m: string, severity?: 'success' | 'e
   );
 }
 
+// NOTAS (boletim com gráfico, busca e filtro por situação)
+type StatusFilter = 'Todas' | 'Aprovado' | 'Em andamento';
+
+const fmt = (n: number) => n.toFixed(1).replace('.', ',');
+
 function Notas() {
+  const [query, setQuery] = useState('');
+  const [status, setStatus] = useState<StatusFilter>('Todas');
+
   const media = grades.reduce((sum, g) => sum + g.grade, 0) / grades.length;
   const aprovadas = grades.filter(g => g.status === 'Aprovado').length;
   const emAndamento = grades.length - aprovadas;
 
+  const filters: { label: StatusFilter; count: number }[] = [
+    { label: 'Todas', count: grades.length },
+    { label: 'Aprovado', count: aprovadas },
+    { label: 'Em andamento', count: emAndamento },
+  ];
+
+  const term = query.trim().toLowerCase();
+  const filtered = grades.filter(g =>
+    (status === 'Todas' || g.status === status) &&
+    `${g.name} ${g.code} ${g.professor}`.toLowerCase().includes(term)
+  );
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
       <Box>
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>Boletim Acadêmico</Typography>
+        <Typography variant="h5">Boletim Acadêmico</Typography>
         <Typography variant="body2" color="text.secondary">Acompanhe suas notas e o andamento de cada disciplina no período 2026.2.</Typography>
       </Box>
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 8 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {grades.map(g => (
-              <Card key={g.code} variant="outlined">
-                <CardContent sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1.5 }}>
-                  <Box sx={{ flexGrow: 1, minWidth: 180 }}>
-                    <Typography variant="subtitle1">{g.name}</Typography>
-                    <Typography variant="caption" color="text.secondary">{g.code} • {g.professor}</Typography>
-                  </Box>
-                  <Chip label={g.status} color="primary" variant={g.status === 'Aprovado' ? 'filled' : 'outlined'} size="small" />
-                  <Typography variant="h6" sx={{ minWidth: 44, textAlign: 'right' }}>{g.grade.toFixed(1)}</Typography>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
+          <Card variant="outlined">
+            <CardContent>
+              <TextField
+                fullWidth
+                size="small"
+                placeholder="Buscar por disciplina, código ou professor"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                slotProps={{
+                  htmlInput: { 'aria-label': 'Buscar disciplina no boletim' },
+                  input: { startAdornment: <InputAdornment position="start"><Search size={18} /></InputAdornment> },
+                }}
+              />
+              <Box role="group" aria-label="Filtrar por situação" sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+                {filters.map(f => (
+                  <Chip
+                    key={f.label}
+                    label={`${f.label} (${f.count})`}
+                    clickable
+                    onClick={() => setStatus(f.label)}
+                    aria-pressed={status === f.label}
+                    color={status === f.label ? 'primary' : 'default'}
+                    variant={status === f.label ? 'filled' : 'outlined'}
+                  />
+                ))}
+              </Box>
+
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2, mt: 3, mb: 1 }}>
+                <Typography variant="subtitle2" sx={{ mr: 'auto' }}>Desempenho por disciplina</Typography>
+                <LegendItem color="primary.main" label="Aprovado" />
+                <LegendItem color="text.secondary" label="Em andamento" />
+                <LegendItem color="text.primary" label={`Mínimo ${fmt(PASSING_GRADE)}`} marker />
+              </Box>
+
+              {filtered.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 6 }}>
+                  <Typography variant="h6">Nenhuma disciplina encontrada</Typography>
+                  <Typography color="text.secondary" sx={{ mb: 2 }}>Ajuste a busca ou o filtro para ver outras disciplinas.</Typography>
+                  <Button variant="outlined" onClick={() => { setQuery(''); setStatus('Todas'); }}>Limpar filtros</Button>
+                </Box>
+              ) : (
+                <Box component="ul" sx={{ listStyle: 'none', m: 0, p: 0 }}>
+                  {filtered.map((g, i) => (
+                    <Box component="li" key={g.code} sx={{ py: 2, borderTop: i === 0 ? 'none' : '1px solid', borderColor: 'divider' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 1.5 }}>
+                        <Box sx={{ flexGrow: 1, minWidth: 160 }}>
+                          <Typography variant="subtitle1">{g.name}</Typography>
+                          <Typography variant="caption" color="text.secondary">{g.code} • {g.professor}</Typography>
+                        </Box>
+                        <Chip label={g.status} size="small" color="primary" variant={g.status === 'Aprovado' ? 'filled' : 'outlined'} />
+                        <Typography variant="h6" sx={{ minWidth: 40, textAlign: 'right' }}>{fmt(g.grade)}</Typography>
+                      </Box>
+                      <Box
+                        role="img"
+                        aria-label={`${g.name}: nota ${fmt(g.grade)} de 10, ${g.status}`}
+                        sx={{ position: 'relative', height: 10, borderRadius: 999, bgcolor: 'background.default' }}
+                      >
+                        <Box sx={{ height: '100%', width: `${g.grade * 10}%`, borderRadius: 999, bgcolor: g.status === 'Aprovado' ? 'primary.main' : 'text.secondary', transition: 'width 0.4s ease' }} />
+                        <Box sx={{ position: 'absolute', top: -3, bottom: -3, left: `${PASSING_GRADE * 10}%`, width: 2, bgcolor: 'text.primary', opacity: 0.6 }} />
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
+              )}
+            </CardContent>
+          </Card>
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }}>
@@ -589,7 +681,7 @@ function Notas() {
               <Divider sx={{ my: 1.5 }} />
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography color="text.secondary">Média geral:</Typography>
-                <Typography sx={{ fontWeight: 500 }}>{media.toFixed(1)}</Typography>
+                <Typography sx={{ fontWeight: 500 }}>{fmt(media)}</Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography color="text.secondary">Disciplinas aprovadas:</Typography>
@@ -603,6 +695,15 @@ function Notas() {
           </Card>
         </Grid>
       </Grid>
+    </Box>
+  );
+}
+
+function LegendItem({ color, label, marker }: { color: string; label: string; marker?: boolean }) {
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+      <Box sx={{ width: marker ? 2 : 10, height: marker ? 14 : 10, borderRadius: marker ? 0 : 999, bgcolor: color, opacity: marker ? 0.6 : 1 }} />
+      <Typography variant="caption" color="text.secondary">{label}</Typography>
     </Box>
   );
 }
