@@ -119,6 +119,7 @@ export function buildTheme(darkMode: boolean) {
           outlined: { borderColor: t.hairline },
         },
       },
+      MuiTab: { styleOverrides: { root: { textTransform: 'none', fontWeight: 500, minHeight: 44 } } },
       MuiAlert: { styleOverrides: { root: { borderRadius: radius.interactive } } },
       MuiListItemButton: { styleOverrides: { root: { borderRadius: radius.interactive } } },
       MuiMenu: {

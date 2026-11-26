@@ -11,6 +11,7 @@ import { buildTheme } from './theme';
 import { grades, subjects, availableSubjects, ENROLLED_CREDITS, MAX_CREDITS, PASSING_GRADE } from './data';
 import { findConflicts } from './schedule';
 import PlannerDialog from './PlannerDialog';
+import CalendarPage from './CalendarPage';
 
 import {
   Home, BarChart3, BookOpen, ClipboardCheck, UserRound, Menu as MenuIcon,
@@ -19,7 +20,7 @@ import {
   Moon, Sun, ArrowRight, Search, type LucideIcon
 } from 'lucide-react';
 
-type Page = 'dashboard' | 'notas' | 'disciplinas' | 'matricula' | 'perfil';
+type Page = 'dashboard' | 'notas' | 'disciplinas' | 'matricula' | 'calendario' | 'perfil';
 
 type NavItem = {
   id: Page;
@@ -32,6 +33,7 @@ const navItems: NavItem[] = [
   { id: 'notas', label: 'Notas', icon: BarChart3 },
   { id: 'disciplinas', label: 'Disciplinas', icon: BookOpen },
   { id: 'matricula', label: 'Matrícula', icon: ClipboardCheck },
+  { id: 'calendario', label: 'Calendário', icon: CalendarDays },
   { id: 'perfil', label: 'Meu perfil', icon: UserRound },
 ];
 
@@ -69,6 +71,7 @@ export default function App() {
     notas: 'Minhas notas',
     disciplinas: 'Minhas disciplinas',
     matricula: 'Matrícula',
+    calendario: 'Calendário inteligente',
     perfil: 'Meu perfil',
   }[page]), [page]);
 
@@ -113,11 +116,12 @@ export default function App() {
           </Drawer>
         </Box>
 
-        <Box component="main" id="conteudo" tabIndex={-1} sx={{ outline: 'none',  flexGrow: 1, p: { xs: 2, sm: 3, md: 4 }, width: { lg: `calc(100% - ${drawerWidth}px)` }, mt: `${headerHeight}px` }}>
+        <Box component="main" id="conteudo" tabIndex={-1} sx={{ outline: 'none', minWidth: 0,  flexGrow: 1, p: { xs: 2, sm: 3, md: 4 }, width: { lg: `calc(100% - ${drawerWidth}px)` }, mt: `${headerHeight}px` }}>
           {page === 'dashboard' && <Dashboard onNavigate={navigate} onToast={showToast} />}
           {page === 'notas' && <Notas />}
           {page === 'disciplinas' && <Disciplinas />}
           {page === 'matricula' && <Matricula onToast={showToast} />}
+          {page === 'calendario' && <CalendarPage onToast={showToast} />}
           {page === 'perfil' && <Perfil onToast={showToast} />}
         </Box>
 
